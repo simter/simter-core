@@ -115,5 +115,7 @@ public class PageTest {
       assertThat(row, is(String.valueOf(i)));
       i++;
     }
+    //System.out.println(page.getClass());
+    //System.out.println(new Genson().serialize(page));
   }
 }

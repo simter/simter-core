@@ -105,66 +105,75 @@ public interface Page<T> extends Serializable, Iterable<T> {
    * @return the page instance holds the data
    */
   static <T> Page<T> build(int number, int capacity, List<T> rows, long totalCount) {
-    int number_ = Math.max(1, number);
-    int capacity_ = Math.max(1, capacity);
-    List<T> rows_ = rows != null ? Collections.unmodifiableList(rows) : Collections.emptyList();
-    long totalCount_ = Math.max(0, totalCount);
-    return new Page<T>() {
+    // Make this class can not be reached from outside.
+    class PageImpl<T> implements Page<T> {
+      private int number;
+      private int capacity;
+      private List<T> rows;
+      private long totalCount;
+
+      public PageImpl(int number, int capacity, List<T> rows, long totalCount) {
+        this.number = Math.max(1, number);
+        this.capacity = Math.max(1, capacity);
+        this.rows = rows != null ? Collections.unmodifiableList(rows) : Collections.emptyList();
+        this.totalCount = Math.max(0, totalCount);
+      }
+
       @Override
       public int getNumber() {
-        return number_;
+        return number;
       }
 
       @Override
       public int getCapacity() {
-        return capacity_;
+        return capacity;
       }
 
       @Override
       public List<T> getRows() {
-        return rows_;
+        return rows;
       }
 
       @Override
       public long getTotalCount() {
-        return totalCount_;
+        return totalCount;
       }
 
       @Override
       public int getPageCount() {
-        return (int) Math.ceil((double) totalCount_ / (double) capacity_);
+        return (int) Math.ceil((double) totalCount / (double) capacity);
       }
 
       @Override
       public int getOffset() {
-        return (number_ - 1) * capacity_;
+        return (number - 1) * capacity;
       }
 
       @Override
       public boolean isEmpty() {
-        return rows_.isEmpty();
+        return rows.isEmpty();
       }
 
       @Override
       public int getSize() {
-        return rows_.size();
+        return rows.size();
       }
 
       @Override
       public boolean isFirst() {
-        return number_ <= 1;
+        return number <= 1;
       }
 
       @Override
       public boolean isLast() {
-        return number_ + 1 > getPageCount();
+        return number + 1 > getPageCount();
       }
 
       // implement the {@link Iterable<T>} interface
 
       @Override
       public Iterator<T> iterator() {
-        return rows_.iterator();
+        return rows.iterator();
       }
 
       @Override
@@ -174,6 +183,7 @@ public interface Page<T> extends Serializable, Iterable<T> {
           action.accept(t);
         }
       }
-    };
+    }
+    return new PageImpl<>(number, capacity, rows, totalCount);
   }
 }
