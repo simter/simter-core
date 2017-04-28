@@ -1,5 +1,7 @@
 package tech.simter.persistence;
 
+import java.util.Objects;
+
 /**
  * The Sex Enum
  *
@@ -22,16 +24,17 @@ public enum Sex implements PersistenceEnum<Integer> {
   }
 
   /**
-   * Get the Sex with the specified value.
+   * Get the Sex with the persistence value.
    *
    * @param value The value
-   * @return The Sex of the specified value
+   * @return The Sex of the persistence value
    * @throws IllegalArgumentException If the value is unsupported
    */
   public static Sex valueOf(Integer value) {
+    Objects.requireNonNull(value);
     for (Sex status : Sex.values()) {
       if (status.value().equals(value)) return status;
     }
-    throw new IllegalArgumentException("unsupported sex value: " + value);
+    throw new IllegalArgumentException("unsupported Sex value: " + value);
   }
 }

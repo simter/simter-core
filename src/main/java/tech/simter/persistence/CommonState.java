@@ -1,5 +1,7 @@
 package tech.simter.persistence;
 
+import java.util.Objects;
+
 /**
  * The common state with the persistence value that is 2 of the n power.
  *
@@ -38,16 +40,17 @@ public enum CommonState implements PersistenceEnum<Integer> {
   }
 
   /**
-   * Get the state with the specified value.
+   * Get the state with the persistence value.
    *
    * @param value The value
-   * @return The CommonState of the specified value
+   * @return The CommonState of the persistence value
    * @throws IllegalArgumentException If the value is unsupported
    */
   public static CommonState valueOf(Integer value) {
+    Objects.requireNonNull(value);
     for (CommonState status : CommonState.values()) {
       if (status.value().equals(value)) return status;
     }
-    throw new IllegalArgumentException("unsupported state value: " + value);
+    throw new IllegalArgumentException("unsupported CommonState value: " + value);
   }
 }
