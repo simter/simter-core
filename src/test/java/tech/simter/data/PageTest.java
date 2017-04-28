@@ -14,7 +14,7 @@ import static org.junit.Assert.assertThat;
  */
 public class PageTest {
   @Test
-  public void empty() throws Exception {
+  public void empty() {
     Page<Object> page = Page.build(0, 0, null, 0);
     assertThat(page.getNumber(), is(1));
     assertThat(page.getCapacity(), is(1));
@@ -30,7 +30,7 @@ public class PageTest {
   }
 
   @Test
-  public void firstPage() throws Exception {
+  public void firstPage() {
     List<String> items = new ArrayList<>();
     items.add("1");
     Page<String> page = Page.build(1, 25, items, 101);
@@ -48,7 +48,7 @@ public class PageTest {
   }
 
   @Test
-  public void secondPage() throws Exception {
+  public void secondPage() {
     List<String> items = new ArrayList<>();
     items.add("1");
     Page<String> page = Page.build(2, 25, items, 101);
@@ -80,7 +80,7 @@ public class PageTest {
   }
 
   @Test
-  public void lastPage() throws Exception {
+  public void lastPage() {
     List<String> items = new ArrayList<>();
     items.add("1");
     Page<String> page = Page.build(5, 25, items, 101);
@@ -98,10 +98,22 @@ public class PageTest {
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void canNotModifyPageData() throws Exception {
+  public void canNotModifyPageData() {
     List<String> items = new ArrayList<>();
     items.add("1");
     Page<String> page = Page.build(1, 25, items, 101);
     page.getRows().add("something");
+  }
+
+  @Test
+  public void iterator() {
+    List<String> items = new ArrayList<>();
+    for (int i = 0; i < 10; i++) items.add(String.valueOf(i));
+    Page<String> page = Page.build(1, 25, items, 101);
+    int i = 0;
+    for (String row : page) {
+      assertThat(row, is(String.valueOf(i)));
+      i++;
+    }
   }
 }

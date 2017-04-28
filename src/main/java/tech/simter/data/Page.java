@@ -1,11 +1,11 @@
-/**
- *
- */
 package tech.simter.data;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * A page is a sublist of a list of objects.
@@ -22,7 +22,7 @@ import java.util.List;
  * @param <T> the type of the row data
  * @author RJ 2017-04-27
  */
-public interface Page<T> extends Serializable {
+public interface Page<T> extends Serializable, Iterable<T> {
   /**
    * The number of this page. It's minimal value is 1.
    *
@@ -95,19 +95,6 @@ public interface Page<T> extends Serializable {
   boolean isLast();
 
   /**
-   * Calculate the offset value by pageNo and capacity
-   *
-   * @param pageNo  the page number
-   * @param maxSize the page maximal size
-   * @return the offset value
-   */
-  static int calculateOffset(int pageNo, int maxSize) {
-    pageNo = pageNo < 1 ? 1 : pageNo;
-    maxSize = maxSize < 1 ? 1 : maxSize;
-    return (pageNo - 1) * maxSize;
-  }
-
-  /**
    * Build a new page instance.
    *
    * @param number     the page number
@@ -171,6 +158,21 @@ public interface Page<T> extends Serializable {
       @Override
       public boolean isLast() {
         return number_ + 1 > getPageCount();
+      }
+
+      // implement the {@link Iterable<T>} interface
+
+      @Override
+      public Iterator<T> iterator() {
+        return rows_.iterator();
+      }
+
+      @Override
+      public void forEach(Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        for (T t : this.getRows()) {
+          action.accept(t);
+        }
       }
     };
   }
