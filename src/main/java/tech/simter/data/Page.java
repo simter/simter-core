@@ -106,13 +106,13 @@ public interface Page<T> extends Serializable, Iterable<T> {
    */
   static <T> Page<T> build(int number, int capacity, List<T> rows, long totalCount) {
     // Make this class can not be reached from outside.
-    class PageImpl<T> implements Page<T> {
+    class PageImpl<TT> implements Page<TT> {
       private int number;
       private int capacity;
-      private List<T> rows;
+      private List<TT> rows;
       private long totalCount;
 
-      public PageImpl(int number, int capacity, List<T> rows, long totalCount) {
+      private PageImpl(int number, int capacity, List<TT> rows, long totalCount) {
         this.number = Math.max(1, number);
         this.capacity = Math.max(1, capacity);
         this.rows = rows != null ? Collections.unmodifiableList(rows) : Collections.emptyList();
@@ -130,7 +130,7 @@ public interface Page<T> extends Serializable, Iterable<T> {
       }
 
       @Override
-      public List<T> getRows() {
+      public List<TT> getRows() {
         return rows;
       }
 
@@ -169,17 +169,17 @@ public interface Page<T> extends Serializable, Iterable<T> {
         return number + 1 > getPageCount();
       }
 
-      // implement the {@link Iterable<T>} interface
+      // implement the {@link Iterable<TT>} interface
 
       @Override
-      public Iterator<T> iterator() {
+      public Iterator<TT> iterator() {
         return rows.iterator();
       }
 
       @Override
-      public void forEach(Consumer<? super T> action) {
+      public void forEach(Consumer<? super TT> action) {
         Objects.requireNonNull(action);
-        for (T t : this.getRows()) {
+        for (TT t : this.getRows()) {
           action.accept(t);
         }
       }

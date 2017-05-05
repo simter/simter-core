@@ -10,7 +10,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 /**
- * @author RJ 2017-04-27
+ * @author RJ
  */
 public class PageTest {
   @Test
