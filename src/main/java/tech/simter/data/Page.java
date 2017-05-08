@@ -24,6 +24,11 @@ import java.util.function.Consumer;
  */
 public interface Page<T> extends Serializable, Iterable<T> {
   /**
+   * The default page capacity.
+   */
+  int DEFAULT_CAPACITY = 25;
+
+  /**
    * The number of this page. It's minimal value is 1.
    *
    * @return the number of this page
@@ -114,7 +119,7 @@ public interface Page<T> extends Serializable, Iterable<T> {
 
       private PageImpl(int number, int capacity, List<TT> rows, long totalCount) {
         this.number = Math.max(1, number);
-        this.capacity = Math.max(1, capacity);
+        this.capacity = toValidCapacity(capacity);
         this.rows = rows != null ? Collections.unmodifiableList(rows) : Collections.emptyList();
         this.totalCount = Math.max(0, totalCount);
       }
@@ -185,5 +190,29 @@ public interface Page<T> extends Serializable, Iterable<T> {
       }
     }
     return new PageImpl<>(number, capacity, rows, totalCount);
+  }
+
+  /**
+   * Calculate the offset value
+   *
+   * @param number   the page number, default to 1 if less then 1
+   * @param capacity the page capacity, default to {@link Page#DEFAULT_CAPACITY} if less then 1
+   * @return the offset value, it's minimal value is zero
+   */
+  static int calculateOffset(int number, int capacity) {
+    number = Math.max(1, number);
+    capacity = toValidCapacity(capacity);
+    return (number - 1) * capacity;
+  }
+
+  /**
+   * Convert the specific capacity to a valid value.
+   * If the specific capacity less then 1, return {@link Page#DEFAULT_CAPACITY}, otherwise return the specific capacity.
+   *
+   * @param capacity the specific capacity
+   * @return a valid capacity
+   */
+  static int toValidCapacity(int capacity) {
+    return capacity < 1 ? DEFAULT_CAPACITY : capacity;
   }
 }
