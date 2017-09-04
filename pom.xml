@@ -50,7 +50,6 @@
     <dependency>
       <groupId>javax.json</groupId>
       <artifactId>javax.json-api</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
