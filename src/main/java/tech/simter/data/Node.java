@@ -1,32 +1,52 @@
 package tech.simter.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * An node for tree view.
+ * A tree-node data holder.
  *
  * @author cjw
+ * @author RJ
  */
 public class Node implements Serializable {
   /**
-   * The id
+   * The id.
    */
-  public String id;
+  private Object id;
   /**
-   * The label
+   * The label.
    */
-  public String label;
-  private boolean leaf;
+  private String label;
+  private boolean leaf = true;
+  private boolean collapsed = true;
+  private boolean selected = false;
+  private String icon;
 
   /**
-   * Instance with only id. This also set label equals to id.
-   *
-   * @param id
+   * The url to load children if not specified children explicit.
    */
-  public Node(String id, boolean leaf) {
+  private String url;
+  /**
+   * The url param key that will append to the url when load children by url.
+   */
+  private String paramKey;
+  /**
+   * The child nodes.
+   */
+  private List<Node> children;
+
+  public Node() {
+  }
+
+  /**
+   * Instance with id.
+   *
+   * @param id the id
+   */
+  public Node(Object id) {
     this.id = id;
-    this.label = id;
-    this.setLeaf(leaf);
   }
 
   /**
@@ -35,61 +55,105 @@ public class Node implements Serializable {
    * @param id    the id
    * @param label the label
    */
-  public Node(String id, String label, boolean leaf) {
+  public Node(Object id, String label) {
     this.id = id;
     this.label = label;
-    this.setLeaf(leaf);
   }
 
-  /**
-   * Instance with id and label.
-   *
-   * @param id    the number id
-   * @param label the label
-   */
-  public Node(Number id, String label, boolean leaf) {
-    this.id = id.toString();
-    this.label = label;
-    this.setLeaf(leaf);
+  public Object getId() {
+    return id;
   }
 
-  /**
-   * Instance with id and label.
-   *
-   * @param id    the id
-   * @param label the number label
-   */
-  public Node(String id, Number label, boolean leaf) {
+  public Node setId(Object id) {
     this.id = id;
-    this.label = label.toString();
-    this.setLeaf(leaf);
+    return this;
   }
 
-  /**
-   * Instance with id and label.
-   *
-   * @param id    the number id
-   * @param label the number label
-   */
-  public Node(Number id, Number label, boolean leaf) {
-    this.id = id.toString();
-    this.label = label.toString();
-    this.setLeaf(leaf);
+  public String getLabel() {
+    return label;
   }
 
-  /**
-   * Whether the node has child node at all.
-   */
+  public Node setLabel(String label) {
+    this.label = label;
+    return this;
+  }
+
   public boolean isLeaf() {
     return leaf;
   }
 
-  /**
-   * Set the leaf with specified list.
-   *
-   * @param leaf value to be set.
-   */
-  public void setLeaf(boolean leaf) {
+  public Node setLeaf(boolean leaf) {
     this.leaf = leaf;
+    return this;
+  }
+
+  public boolean isCollapsed() {
+    return collapsed;
+  }
+
+  public Node setCollapsed(boolean collapsed) {
+    this.collapsed = collapsed;
+    return this;
+  }
+
+  public boolean isSelected() {
+    return selected;
+  }
+
+  public Node setSelected(boolean selected) {
+    this.selected = selected;
+    return this;
+  }
+
+  public String getIcon() {
+    return icon;
+  }
+
+  public Node setIcon(String icon) {
+    this.icon = icon;
+    return this;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public Node setUrl(String url) {
+    this.url = url;
+    this.leaf = (url == null || url.isEmpty());
+    return this;
+  }
+
+  public String getParamKey() {
+    return paramKey;
+  }
+
+  public Node setParamKey(String paramKey) {
+    this.paramKey = paramKey;
+    return this;
+  }
+
+  public List<Node> getChildren() {
+    return children;
+  }
+
+  public Node setChildren(List<Node> children) {
+    this.children = children;
+    this.leaf = children == null;
+    if (children != null) this.url = null;
+    return this;
+  }
+
+  /**
+   * Add one node to the children.
+   *
+   * @param child the child to add
+   * @return this instance
+   */
+  public Node addChildren(Node child) {
+    if (child == null) return this;
+    if (this.children == null) this.children = new ArrayList<>();
+    this.children.add(child);
+    return this;
   }
 }
