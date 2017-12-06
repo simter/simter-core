@@ -126,7 +126,7 @@ public class ImportedResult implements Serializable {
      * @param msg    the failure description
      * @param source the origin row data
      */
-    public Error(int index, String msg, List source) {
+    public Error(int index, String msg, List<Object> source) {
       this.index = index;
       this.msg = msg;
       this.source = source;
@@ -138,7 +138,7 @@ public class ImportedResult implements Serializable {
      * @return the list contains origin row data
      */
     public List<Object> getSource() {
-      if (null == source) source = new ArrayList();
+      if (null == source) source = new ArrayList<>();
       return source;
     }
 
