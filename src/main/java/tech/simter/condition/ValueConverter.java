@@ -1,9 +1,12 @@
 package tech.simter.condition;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.sql.Date;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 
 /**
  * The value converter.
@@ -21,7 +24,8 @@ final class ValueConverter {
    *
    * @param type  Supported types are String|int|Integer|long|Long|float|Float|double|Double|Decimal|boolean|Boolean
    *              |String[]|int[]|Integer[]|long[]|Long[]|float[]|Float[]|double[]|Double[]|Decimal[]|boolean[]|Boolean[]
-   *              |LocalDate|LocalDateTime|LocalTime
+   *              |Date(only yyyy-MM-dd)|Calendar(only yyyy-MM-dd HH:mm:ss)
+   *              |LocalDate|LocalDateTime|LocalTime|Year|YearMonth|Month|java.sql.Date
    * @param value The string value
    * @return The converted value with the specific type
    * @throws IllegalArgumentException If type is unsupported
@@ -55,13 +59,68 @@ final class ValueConverter {
     else if (type.equals("BigDecimal") || type.equalsIgnoreCase("Decimal")) return (T) toBigDecimal(value);
     else if (type.equals("BigDecimal[]") || type.equalsIgnoreCase("Decimal[]"))
       return (T) toBigDecimalArray(value, SEPARATOR);
+    else if (type.equals("Date")) return (T) toSqlDate(value);
+    else if (type.equals("Calendar")) return (T) toCalendar(value);
     else if (type.equals("LocalDate")) return (T) toLocalDate(value);
     else if (type.equals("LocalDate[]")) return (T) toLocalDateArray(value, SEPARATOR);
     else if (type.equals("LocalDateTime")) return (T) toLocalDateTime(value);
     else if (type.equals("LocalDateTime[]")) return (T) toLocalDateTimeArray(value, SEPARATOR);
     else if (type.equals("LocalTime")) return (T) toLocalTime(value);
     else if (type.equals("LocalTime[]")) return (T) toLocalTimeArray(value, SEPARATOR);
-    else throw new IllegalArgumentException("unsupported value type: type=" + type + ", value=" + value);
+    else if (type.equals("Year")) return (T) toYear(value);
+    else if (type.equals("YearMonth")) return (T) toYearMonth(value);
+    else if (type.equals("Month")) return (T) toMonth(value);
+      // 调用类的构造函数 Constructor(String) 或静态方法 valueOf(String)、parse(String) 来获取值
+    else return valueOf(type, value);
+    //else throw new IllegalArgumentException("unsupported value type: type=" + type + ", value=" + value);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> T valueOf(String type, String value) {
+    if (value == null || value.isEmpty()) return null;
+    try {
+      Class<?> clazz = Class.forName(type);
+      try {
+        // instance by single String param constructor
+        Constructor constructor = clazz.getDeclaredConstructor(String.class);
+        return (T) constructor.newInstance(value);
+      } catch (NoSuchMethodException e) {
+        try {
+          // instance by single CharSequence param constructor
+          Constructor constructor = clazz.getDeclaredConstructor(CharSequence.class);
+          return (T) constructor.newInstance(value);
+        } catch (NoSuchMethodException e1) {
+          try {
+            // instance by single String param static method with name 'valueOf'
+            Method method = clazz.getDeclaredMethod("valueOf", String.class);
+            return (T) method.invoke(clazz, value);
+          } catch (NoSuchMethodException me) {
+            try {
+              // instance by single CharSequence param static method with name 'valueOf'
+              Method method = clazz.getDeclaredMethod("valueOf", CharSequence.class);
+              return (T) method.invoke(clazz, value);
+            } catch (NoSuchMethodException me1) {
+              try {
+                // instance by single String param static method with name 'parse'
+                Method method = clazz.getDeclaredMethod("parse", String.class);
+                return (T) method.invoke(clazz, value);
+              } catch (NoSuchMethodException me2) {
+                try {
+                  // instance by single CharSequence param static method with name 'parse'
+                  Method method = clazz.getDeclaredMethod("parse", CharSequence.class);
+                  return (T) method.invoke(clazz, value);
+                } catch (NoSuchMethodException me3) {
+                  throw new RuntimeException("At leas define one String param constructor" +
+                    " or static method with name 'valueOf' or 'parse' for class '" + type + "'");
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      throw new IllegalArgumentException(e.getMessage(), e);
+    }
   }
 
   private static String toString(String value) {
@@ -209,6 +268,25 @@ final class ValueConverter {
     return result;
   }
 
+  private static Date toSqlDate(String value) {
+    return value == null || value.isEmpty() ? null : Date.valueOf(value.trim());
+  }
+
+  // only support 'yyyy-MM-dd HH:mm:ss' format
+  private static Calendar toCalendar(String value) {
+    if (value == null || value.isEmpty()) return null;
+    LocalDateTime parse = LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    Calendar instance = Calendar.getInstance();
+    instance.set(Calendar.YEAR, parse.getYear());
+    instance.set(Calendar.MONTH, parse.getMonthValue() - 1);
+    instance.set(Calendar.DAY_OF_MONTH, parse.getDayOfMonth());
+    instance.set(Calendar.HOUR_OF_DAY, parse.getHour());
+    instance.set(Calendar.MINUTE, parse.getMinute());
+    instance.set(Calendar.SECOND, parse.getSecond());
+    instance.set(Calendar.MILLISECOND, 0);
+    return instance;
+  }
+
   private static LocalDate toLocalDate(String value) {
     return value == null || value.isEmpty() ? null : LocalDate.parse(value.trim());
   }
@@ -243,5 +321,17 @@ final class ValueConverter {
     LocalTime[] result = new LocalTime[strArray.length];
     for (int i = 0; i < strArray.length; i++) result[i] = toLocalTime(strArray[i]);
     return result;
+  }
+
+  private static Year toYear(String value) {
+    return value == null || value.isEmpty() ? null : Year.parse(value);
+  }
+
+  private static YearMonth toYearMonth(String value) {
+    return value == null || value.isEmpty() ? null : YearMonth.parse(value);
+  }
+
+  private static Month toMonth(String value) {
+    return value == null || value.isEmpty() ? null : Month.of(Integer.parseInt(value));
   }
 }

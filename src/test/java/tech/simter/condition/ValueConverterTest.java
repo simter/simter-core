@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Calendar;
+import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -153,6 +155,39 @@ public class ValueConverterTest {
     assertThat(array.length, is(2));
     assertThat(array[0], is(LocalTime.parse("13:10:20")));
     assertThat(array[1], is(LocalTime.parse("13:10:30")));
+  }
+
+  @Test
+  public void toCalendar() {
+    String value = "2017-01-01 12:10:20";
+    Calendar calendar = Calendar.getInstance();
+    calendar.set(2017, 0, 1, 12, 10, 20);
+    calendar.set(Calendar.MILLISECOND, 0);
+    assertThat(ValueConverter.convert("Calendar", value), is(calendar));
+  }
+
+  @Test
+  @Deprecated
+  public void byConstructor() {
+    // java.util.Date.Date(java.lang.String)
+    String value = new Date().toString(); // like "Mon Dec 04 18:02:35 CST 2017"
+    assertThat(ValueConverter.convert("java.util.Date", value), is(new java.util.Date(value)));
+  }
+
+  @Test
+  public void byStaticMethodValueOf() {
+    // java.sql.Date.valueOf(java.lang.String)
+    String value = "2017-01-02";
+    assertThat(ValueConverter.convert("java.sql.Date", value), is(java.sql.Date.valueOf(value)));
+    value = "2017-1-2";
+    assertThat(ValueConverter.convert("java.sql.Date", value), is(java.sql.Date.valueOf(value)));
+  }
+
+  @Test
+  public void byStaticMethodParse() {
+    String value = "2017-01-02";
+    // java.time.LocalDate.parse(java.lang.CharSequence)
+    assertThat(ValueConverter.convert("java.time.LocalDate", value), is(java.time.LocalDate.parse(value)));
   }
 
   @Test(expected = IllegalArgumentException.class)

@@ -8,10 +8,9 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static tech.simter.condition.ComparisonOperator.*;
 import static tech.simter.condition.ValueConverter.convert;
@@ -61,11 +60,17 @@ public interface Condition {
    * Such as key="code", name=":code", this={@link ComparisonOperator#Equals},
    * then the return value should be "code = :code".
    *
-   * @param namedParamNames The NamedParam name, use '?' instead if not specified
+   * @param alias               The alias for sql, use {@link #getId()} instead if ignore
+   * @param paramValueContainer The NamedParam values container
+   * @param namedParamNames     The NamedParam name, use '?' instead if not specified
    * @return query language
    * @throws UnsupportedOperationException If is range enum
    */
-  String toQL(String... namedParamNames);
+  String toQL(String alias, Map<String, Object> paramValueContainer, String... namedParamNames);
+
+  String toQL(String alias, List<Object> paramValueContainer);
+
+  String toQL();
 
   /**
    * Build a new Condition instance.
@@ -160,7 +165,7 @@ public interface Condition {
    * Convert the condition to a ql with the specific NamedParam names.
    * <p>
    * If NamedParam is not specified and the condition has a valid value in the value position,
-   * use '?' as the default NamedParam name.
+   * use {@link #getId()} as the default NamedParam name.
    * <p>
    * For examples: <br>
    * 1) id="code", operator={@link ComparisonOperator#Equals Equals}, namedParamNames=[":code"].
@@ -168,61 +173,135 @@ public interface Condition {
    * 2) id="code", operator={@link ComparisonOperator#RangeGTAndLTE (]}, namedParamNames=[":code1", ":code2"].
    * Then return value should be "code &gt; :code1 and code &lt;= :code2".
    *
-   * @param condition       The condition
-   * @param namedParamNames The NamedParam names
+   * @param condition           The condition
+   * @param alias               The alias for sql, use {@link #getId()} instead if ignore
+   * @param namedParamNames     The NamedParam names
+   * @param paramValueContainer The NamedParam values container
    * @return The query language
    */
-  static String toQL(Condition condition, String... namedParamNames) {
+  static String toQL(Condition condition, String alias, Map<String, Object> paramValueContainer, String... namedParamNames) {
     if (condition == null) throw new IllegalArgumentException("The condition should not be null.");
     if (condition.getId() == null || condition.getId().isEmpty())
       throw new IllegalArgumentException("The condition's id should not be null or empty.");
     if (condition.getOperator() == null)
       throw new IllegalArgumentException("The condition's operator should not be null.");
+    if (alias == null || alias.isEmpty()) alias = condition.getId();
 
     int len = namedParamNames == null ? 0 : namedParamNames.length;
     if (condition.getOperator().isRange()) {
       List<Object> values = condition.getValues();
-      String startName = len > 0 ? namedParamNames[0] : (values.get(0) == null ? null : "?");
-      String endName = len > 1 ? namedParamNames[1] : (values.size() < 2 || values.get(1) == null ? null : "?");
+      String startName = len > 0 ? namedParamNames[0] :
+        (values.get(0) == null ? null : condition.getId() + "0");
+      String endName = len > 1 ? namedParamNames[1] :
+        (values.size() < 2 || values.get(1) == null ? null : condition.getId() + "1");
       if ((startName == null || startName.isEmpty()) && (endName == null || endName.isEmpty()))
         throw new IllegalArgumentException(MessageFormat.format(
           "At lease supply one NamedParam: id={0}, operator={1}, values={2}, namedParamNames={3)",
           condition.getId(), condition.getOperator(), condition.getValue(), namedParamNames));
 
       StringBuffer q = new StringBuffer();
-      if (startName != null && !startName.isEmpty())
-        q.append(condition.getId())
+      if (startName != null && !startName.isEmpty()) {
+        q.append(alias)
           .append(" ")
           .append(condition.getOperator().symbol().startsWith("[") ? ">=" : ">")
           .append(" ")
-          .append(startName);
+          .append(":" + startName);
+        paramValueContainer.put(startName, values.get(0));
+      }
       if (endName != null && !endName.isEmpty()) {
         if (q.length() > 0) q.append(" and ");
-        q.append(condition.getId())
+        q.append(alias)
           .append(" ")
           .append(condition.getOperator().symbol().endsWith("]") ? "<=" : "<")
           .append(" ")
-          .append(endName);
+          .append(":" + endName);
+        paramValueContainer.put(endName, values.get(1));
       }
       return q.toString();
     } else {
-      // Use '?' instead if NamedParam is not specified
-      // TODO : in, not in, like, ilike value with %
+      // TODO : like, ilike value with %
       if (condition.getOperator() == IsNull || condition.getOperator() == IsNotNull) {
-        return condition.getId() + " " + condition.getOperator().symbol();
+        return alias + " " + condition.getOperator().symbol();
       } else if (condition.getOperator() == In || condition.getOperator() == NotIn) {
-        String ql = condition.getId() + " " + condition.getOperator().symbol() + " (";
-        if (len == 0) {                  // use '?' for each value in list values
-          ql += condition.getValues().stream().map(v -> "?").collect(Collectors.joining(", "));
+        String ql = alias + " " + condition.getOperator().symbol() + " (";
+        if (len == 0) {                  // use ':[id]N for each value in list values. e.g. ':name1, name2, ...'
+          if (condition.getValues().size() == 1) {
+            ql += ":" + condition.getId();
+            paramValueContainer.put(condition.getId(), condition.getValues().get(0));
+          } else {
+            ql += IntStream.range(0, condition.getValues().size())
+              .mapToObj(i -> {
+                String name = condition.getId() + i;
+                paramValueContainer.put(name, condition.getValues().get(i));
+                return ":" + name;
+              }).collect(Collectors.joining(", "));
+          }
         } else if (len == 1) {           // such as jpa array param - "id in (:ids)"
-          ql += namedParamNames[0];
+          ql += ":" + namedParamNames[0];
+          paramValueContainer.put(namedParamNames[0], condition.getValue());
         } else {                         // use NamedParam names
-          ql += Arrays.stream(namedParamNames).collect(Collectors.joining(", "));
+          ql += Arrays.stream(namedParamNames).map(n -> ":" + n).collect(Collectors.joining(", "));
+          for (int i = 0; i < condition.getValues().size(); i++)
+            paramValueContainer.put(namedParamNames[i], condition.getValues().get(i));
         }
         ql += ")";
         return ql;
       } else {
-        return condition.getId() + " " + condition.getOperator().symbol() + " " + (len > 0 ? namedParamNames[0] : "?");
+        String name = len > 0 ? namedParamNames[0] : condition.getId();
+        paramValueContainer.put(name, condition.getValue());
+        return alias + " " + condition.getOperator().symbol() + " :" + name;
+      }
+    }
+  }
+
+  static String toQL(Condition condition, String alias, List<Object> paramValueContainer) {
+    boolean hasContainer = paramValueContainer != null;
+    if (condition == null) throw new IllegalArgumentException("The condition should not be null.");
+    if (condition.getId() == null || condition.getId().isEmpty())
+      throw new IllegalArgumentException("The condition's id should not be null or empty.");
+    if (condition.getOperator() == null)
+      throw new IllegalArgumentException("The condition's operator should not be null.");
+    if (alias == null || alias.isEmpty()) alias = condition.getId();
+
+    if (condition.getOperator().isRange()) {
+      int len = condition.getValues().size();
+      if (len == 0) throw new IllegalArgumentException(MessageFormat.format(
+        "At lease supply one ParamValue: id={0}, operator={1}, values={2}",
+        condition.getId(), condition.getOperator(), condition.getValue()));
+      StringBuffer q = new StringBuffer();
+      if (condition.getValues().get(0) != null) {
+        q.append(alias)
+          .append(" ")
+          .append(condition.getOperator().symbol().startsWith("[") ? ">=" : ">")
+          .append(" ")
+          .append("?");
+        if (hasContainer) paramValueContainer.add(condition.getValue());
+      }
+      if (len > 1) {
+        if (q.length() > 0) q.append(" and ");
+        q.append(alias)
+          .append(" ")
+          .append(condition.getOperator().symbol().endsWith("]") ? "<=" : "<")
+          .append(" ")
+          .append("?");
+        if (hasContainer) paramValueContainer.add(condition.getValue());
+      }
+      return q.toString();
+    } else {
+      // TODO : like, ilike value with %
+      if (condition.getOperator() == IsNull || condition.getOperator() == IsNotNull) {
+        return alias + " " + condition.getOperator().symbol();
+      } else if (condition.getOperator() == In || condition.getOperator() == NotIn) {
+        String ql = alias + " " + condition.getOperator().symbol() + " (";
+        ql += condition.getValues().stream().filter(Objects::nonNull).map(value -> {
+          if (hasContainer) paramValueContainer.add(value);
+          return "?";
+        }).collect(Collectors.joining(", "));
+        ql += ")";
+        return ql;
+      } else {
+        if (hasContainer) paramValueContainer.add(condition.getValue());
+        return alias + " " + condition.getOperator().symbol() + " ?";
       }
     }
   }
@@ -263,13 +342,23 @@ public interface Condition {
     }
 
     @Override
-    public String toQL(String... namedParamNames) {
-      return Condition.toQL(this, namedParamNames);
+    public String toQL(String alias, Map<String, Object> paramValueContainer, String... namedParamNames) {
+      return Condition.toQL(this, alias, paramValueContainer, namedParamNames);
+    }
+
+    @Override
+    public String toQL(String alias, List<Object> paramValueContainer) {
+      return Condition.toQL(this, alias, paramValueContainer);
+    }
+
+    @Override
+    public String toQL() {
+      return Condition.toQL(this, null, null);
     }
 
     @Override
     public String toString() {
-      return this.toQL();
+      return this.toQL(null, null);
     }
   }
 }
