@@ -248,7 +248,7 @@ public interface Condition {
         return ql;
       } else {
         String name = len > 0 ? namedParamNames[0] : condition.getId();
-        paramValueContainer.put(name, condition.getValue());
+        paramValueContainer.put(name, "%" + condition.getValue() + "%");
         return alias + " " + condition.getOperator().symbol() + " :" + name;
       }
     }
@@ -300,7 +300,7 @@ public interface Condition {
         ql += ")";
         return ql;
       } else {
-        if (hasContainer) paramValueContainer.add(condition.getValue());
+        if (hasContainer) paramValueContainer.add("%" + condition.getValue() + "%");
         return alias + " " + condition.getOperator().symbol() + " ?";
       }
     }
