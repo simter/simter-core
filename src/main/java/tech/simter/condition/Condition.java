@@ -219,7 +219,6 @@ public interface Condition {
       }
       return q.toString();
     } else {
-      // TODO : like, ilike value with %
       if (condition.getOperator() == IsNull || condition.getOperator() == IsNotNull) {
         return alias + " " + condition.getOperator().symbol();
       } else if (condition.getOperator() == In || condition.getOperator() == NotIn) {
@@ -246,6 +245,12 @@ public interface Condition {
         }
         ql += ")";
         return ql;
+      } else if (condition.getOperator() == Like || condition.getOperator() == iLike) {
+        String name = len > 0 ? namedParamNames[0] : condition.getId();
+        String value = condition.getValue().toString().contains("%") ?
+          condition.getValue().toString() : "%" + condition.getValue() + "%";
+        paramValueContainer.put(name, value);
+        return alias + " " + condition.getOperator().symbol() + " :" + name;
       } else {
         String name = len > 0 ? namedParamNames[0] : condition.getId();
         paramValueContainer.put(name, condition.getValue());
@@ -288,7 +293,6 @@ public interface Condition {
       }
       return q.toString();
     } else {
-      // TODO : like, ilike value with %
       if (condition.getOperator() == IsNull || condition.getOperator() == IsNotNull) {
         return alias + " " + condition.getOperator().symbol();
       } else if (condition.getOperator() == In || condition.getOperator() == NotIn) {
@@ -299,6 +303,11 @@ public interface Condition {
         }).collect(Collectors.joining(", "));
         ql += ")";
         return ql;
+      } else if (condition.getOperator() == Like || condition.getOperator() == iLike) {
+        String value = condition.getValue().toString().contains("%") ?
+          condition.getValue().toString() : "%" + condition.getValue() + "%";
+        if (hasContainer) paramValueContainer.add(value);
+        return alias + " " + condition.getOperator().symbol() + " ?";
       } else {
         if (hasContainer) paramValueContainer.add(condition.getValue());
         return alias + " " + condition.getOperator().symbol() + " ?";
