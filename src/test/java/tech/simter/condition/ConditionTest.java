@@ -313,14 +313,28 @@ public class ConditionTest {
         c = Condition.of(id, operator, value);
         assertThat(c.toQL(null, namedParamsValues), is(String.format("id %s :%s", operator.symbol(), id)));
         assertThat(namedParamsValues.size(), is(1));
-        assertThat(namedParamsValues.get(id), is(value));
+
+        if (operator == Like || operator == iLike) {
+          assertThat(namedParamsValues.get(id), is("%" + value + "%"));
+        } else if (operator == LikeLeft || operator == iLikeLeft) {
+          assertThat(namedParamsValues.get(id), is(value + "%"));
+        } else if (operator == LikeRight || operator == iLikeRight) {
+          assertThat(namedParamsValues.get(id), is("%" + value));
+        } else assertThat(namedParamsValues.get(id), is(value));
 
         // with specified NamedParam
         namedParamsValues = new HashMap<>();
         c = Condition.of(id, operator, value);
         assertThat(c.toQL(null, namedParamsValues, "k"), is(String.format("id %s :%s", operator.symbol(), "k")));
         assertThat(namedParamsValues.size(), is(1));
-        assertThat(namedParamsValues.get("k"), is(value));
+
+        if (operator == Like || operator == iLike) {
+          assertThat(namedParamsValues.get("k"), is("%" + value + "%"));
+        } else if (operator == LikeLeft || operator == iLikeLeft) {
+          assertThat(namedParamsValues.get("k"), is(value + "%"));
+        } else if (operator == LikeRight || operator == iLikeRight) {
+          assertThat(namedParamsValues.get("k"), is("%" + value));
+        } else assertThat(namedParamsValues.get("k"), is(value));
       });
   }
 

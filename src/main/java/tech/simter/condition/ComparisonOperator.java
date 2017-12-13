@@ -81,6 +81,48 @@ public enum ComparisonOperator {
   }
 
   /**
+   * Judge whether this enum is a like enum.
+   *
+   * @return true if is a Like enum, otherwise return false
+   */
+  public boolean isLike() {
+    return this == Like || this == LikeLeft || this == LikeRight
+      || this == iLike || this == iLikeLeft || this == iLikeRight;
+  }
+
+  /**
+   * Auto add '%" symbol to like operator value.
+   *
+   * @param operator    the operator
+   * @param originValue the origin value
+   * @return return originValue if operator is not a like type, otherwise return a new value that added '%" symbol
+   */
+  static Object addPercentSymbolToValueForLike(ComparisonOperator operator, Object originValue) {
+    if (operator == null || originValue == null || !operator.isLike()) return originValue;
+
+    String value_ = originValue.toString();
+    if (!value_.contains("%")) {
+      switch (operator) {
+        case Like:
+        case iLike:
+          value_ = "%" + value_ + "%";
+          break;
+        case LikeLeft:
+        case iLikeLeft:
+          value_ = value_ + "%";
+          break;
+        case LikeRight:
+        case iLikeRight:
+          value_ = "%" + value_;
+          break;
+        default:
+          break;
+      }
+    }
+    return value_;
+  }
+
+  /**
    * Convert the symbol string to enum.
    *
    * @param symbol The symbol

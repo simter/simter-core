@@ -285,15 +285,11 @@ public interface Condition {
         }
         ql += ")";
         return ql;
-      } else if (condition.getOperator() == Like || condition.getOperator() == iLike) {
-        String name = len > 0 ? namedParamNames[0] : condition.getId();
-        String value = condition.getValue().toString().contains("%") ?
-          condition.getValue().toString() : "%" + condition.getValue() + "%";
-        paramValueContainer.put(name, value);
-        return alias + " " + condition.getOperator().symbol() + " :" + name;
       } else {
+        Object value = condition.getValue();
+        if (condition.getOperator().isLike()) value = addPercentSymbolToValueForLike(condition.getOperator(), value);
         String name = len > 0 ? namedParamNames[0] : condition.getId();
-        paramValueContainer.put(name, condition.getValue());
+        paramValueContainer.put(name, value);
         return alias + " " + condition.getOperator().symbol() + " :" + name;
       }
     }
@@ -362,13 +358,10 @@ public interface Condition {
         }).collect(Collectors.joining(", "));
         ql += ")";
         return ql;
-      } else if (condition.getOperator() == Like || condition.getOperator() == iLike) {
-        String value = condition.getValue().toString().contains("%") ?
-          condition.getValue().toString() : "%" + condition.getValue() + "%";
-        if (hasContainer) paramValueContainer.add(value);
-        return alias + " " + condition.getOperator().symbol() + " ?";
       } else {
-        if (hasContainer) paramValueContainer.add(condition.getValue());
+        Object value = condition.getValue();
+        value = addPercentSymbolToValueForLike(condition.getOperator(), value);
+        if (hasContainer) paramValueContainer.add(value);
         return alias + " " + condition.getOperator().symbol() + " ?";
       }
     }
