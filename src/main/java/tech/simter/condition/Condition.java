@@ -66,10 +66,50 @@ public interface Condition {
    * @return query language
    * @throws UnsupportedOperationException If is range enum
    */
+  /**
+   * Convert the condition to a query language with the specific NamedParam names.
+   * <p>
+   * If NamedParam is not specified and the condition has a valid value in the value position,
+   * use {@link #getId()} as the default NamedParam name.
+   * <p>
+   * For examples: <br>
+   * 1) id="code", operator={@link ComparisonOperator#Equals Equals}, namedParamNames=["code1"].
+   * Then return value should be "code = :code1".<br>
+   * 2) id="code", operator={@link ComparisonOperator#RangeGTAndLTE (]}, namedParamNames=["code1", "code2"].
+   * Then return value should be "code &gt; :code1 and code &lt;= :code2".
+   *
+   * @param alias               The alias for query language, use {@link #getId()} instead if ignore
+   * @param paramValueContainer The NamedParam values container
+   * @param namedParamNames     The NamedParam names
+   * @return The query language
+   */
   String toQL(String alias, Map<String, Object> paramValueContainer, String... namedParamNames);
 
+  /**
+   * Convert the condition to a position query language.
+   * <p>
+   * If NamedParam is not specified and the condition has a valid value in the value position,
+   * use {@link #getId()} as the default NamedParam name.
+   * <p>
+   * For examples: <br>
+   * 1) id="code", operator={@link ComparisonOperator#Equals Equals}, alias=null.
+   * Then return value should be "code = ?".<br>
+   * 2) id="code", operator={@link ComparisonOperator#Equals Equals}, alias="t_code".
+   * Then return value should be "t_code = ?".<br>
+   * 3) id="code", operator={@link ComparisonOperator#RangeGTAndLTE (]}, alias=null.
+   * Then return value should be "code &gt; ? and code &lt;= ?".
+   *
+   * @param alias               The alias for query language, use {@link #getId()} instead if ignore
+   * @param paramValueContainer The position values container
+   * @return The position query language
+   */
   String toQL(String alias, List<Object> paramValueContainer);
 
+  /**
+   * The shortcut for `toQL((String) null, (List&lt;Object&gt;) null)`
+   *
+   * @return The position query language
+   */
   String toQL();
 
   /**
@@ -162,21 +202,21 @@ public interface Condition {
   }
 
   /**
-   * Convert the condition to a ql with the specific NamedParam names.
+   * Convert the condition to a query language with the specific NamedParam names.
    * <p>
    * If NamedParam is not specified and the condition has a valid value in the value position,
    * use {@link #getId()} as the default NamedParam name.
    * <p>
    * For examples: <br>
-   * 1) id="code", operator={@link ComparisonOperator#Equals Equals}, namedParamNames=[":code"].
-   * Then return value should be "code = :code".<br>
-   * 2) id="code", operator={@link ComparisonOperator#RangeGTAndLTE (]}, namedParamNames=[":code1", ":code2"].
+   * 1) id="code", operator={@link ComparisonOperator#Equals Equals}, namedParamNames=["code1"].
+   * Then return value should be "code = :code1".<br>
+   * 2) id="code", operator={@link ComparisonOperator#RangeGTAndLTE (]}, namedParamNames=["code1", "code2"].
    * Then return value should be "code &gt; :code1 and code &lt;= :code2".
    *
    * @param condition           The condition
-   * @param alias               The alias for sql, use {@link #getId()} instead if ignore
-   * @param namedParamNames     The NamedParam names
+   * @param alias               The alias for query language, use {@link #getId()} instead if ignore
    * @param paramValueContainer The NamedParam values container
+   * @param namedParamNames     The NamedParam names
    * @return The query language
    */
   static String toQL(Condition condition, String alias, Map<String, Object> paramValueContainer, String... namedParamNames) {
@@ -259,6 +299,25 @@ public interface Condition {
     }
   }
 
+  /**
+   * Convert the condition to a position query language.
+   * <p>
+   * If NamedParam is not specified and the condition has a valid value in the value position,
+   * use {@link #getId()} as the default NamedParam name.
+   * <p>
+   * For examples: <br>
+   * 1) id="code", operator={@link ComparisonOperator#Equals Equals}, alias=null.
+   * Then return value should be "code = ?".<br>
+   * 2) id="code", operator={@link ComparisonOperator#Equals Equals}, alias="t_code".
+   * Then return value should be "t_code = ?".<br>
+   * 3) id="code", operator={@link ComparisonOperator#RangeGTAndLTE (]}, alias=null.
+   * Then return value should be "code &gt; ? and code &lt;= ?".
+   *
+   * @param condition           The condition
+   * @param alias               The alias for query language, use {@link #getId()} instead if ignore
+   * @param paramValueContainer The position values container
+   * @return The query language
+   */
   static String toQL(Condition condition, String alias, List<Object> paramValueContainer) {
     boolean hasContainer = paramValueContainer != null;
     if (condition == null) throw new IllegalArgumentException("The condition should not be null.");
