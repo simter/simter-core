@@ -1,6 +1,20 @@
 # [simter-core](https://github.com/simter/simter-core) changelog
 
+## 1.0.0 - 2019-01-08
+
+- Add `tech.simter.annotation.Comment` annotation
+- Delete `Condition` (some funtion move to simter-query)
+
+## 0.5.0 - 2018-01-05
+
+- Just align version
+
+## 0.4.0 - 2018-01-05
+
+- Just centralize-version
+
 ## 0.3.0 - 2017-12-13
+
 - Annotation (tech.simter.annotation)
     - The `Format` annotation class
 - Query language encapsulation (tech.simter.condition)
