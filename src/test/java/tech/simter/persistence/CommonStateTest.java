@@ -1,49 +1,49 @@
 package tech.simter.persistence;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * @author RJ 2017-04-26
+ * @author RJ
  */
-public class CommonStateTest {
+class CommonStateTest {
   @Test
-  public void valueOf() throws Exception {
-    assertThat(CommonState.valueOf(1), is(CommonState.Draft));
-    assertThat(CommonState.valueOf(2), is(CommonState.Enabled));
-    assertThat(CommonState.valueOf(4), is(CommonState.Disabled));
-    assertThat(CommonState.valueOf(8), is(CommonState.Deleted));
+  void valueOf() {
+    assertEquals(CommonState.Draft, CommonState.valueOf(1));
+    assertEquals(CommonState.Enabled, CommonState.valueOf(2));
+    assertEquals(CommonState.Disabled, CommonState.valueOf(4));
+    assertEquals(CommonState.Deleted, CommonState.valueOf(8));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_0() throws Exception {
-    CommonState.valueOf(0);
+  @Test
+  void valueOfFailed_0() {
+    assertThrows(IllegalArgumentException.class, () -> CommonState.valueOf(0));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_3() throws Exception {
-    CommonState.valueOf(3);
+  @Test
+  void valueOfFailed_3() {
+    assertThrows(IllegalArgumentException.class, () -> CommonState.valueOf(3));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_5() throws Exception {
-    CommonState.valueOf(5);
+  @Test
+  void valueOfFailed_5() {
+    assertThrows(IllegalArgumentException.class, () -> CommonState.valueOf(5));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_6() throws Exception {
-    CommonState.valueOf(6);
+  @Test
+  void valueOfFailed_6() {
+    assertThrows(IllegalArgumentException.class, () -> CommonState.valueOf(6));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_7() throws Exception {
-    CommonState.valueOf(7);
+  @Test
+  void valueOfFailed_7() {
+    assertThrows(IllegalArgumentException.class, () -> CommonState.valueOf(7));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_9() throws Exception {
-    CommonState.valueOf(9);
+  @Test
+  void valueOfFailed_9() {
+    assertThrows(IllegalArgumentException.class, () -> CommonState.valueOf(9));
   }
 }

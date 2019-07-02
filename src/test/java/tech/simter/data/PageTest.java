@@ -1,148 +1,146 @@
 package tech.simter.data;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author RJ
  */
-public class PageTest {
+class PageTest {
   @Test
-  public void empty() {
+  void empty() {
     Page<Object> page = Page.build(0, 0, null, 0);
-    assertThat(page.getNumber(), is(1));
-    assertThat(page.getCapacity(), is(Page.DEFAULT_CAPACITY));
-    assertThat(page.getRows(), notNullValue());
-    assertThat(page.getTotalCount(), is(0L));
+    assertEquals(1, page.getNumber());
+    assertEquals(Page.DEFAULT_CAPACITY, page.getCapacity());
+    assertNotNull(page.getRows());
+    assertEquals(0L, page.getTotalCount());
 
-    assertThat(page.getPageCount(), is(0));
-    assertThat(page.getSize(), is(0));
-    assertThat(page.getOffset(), is(0));
-    assertThat(page.isEmpty(), is(true));
-    assertThat(page.isFirst(), is(true));
-    assertThat(page.isLast(), is(true));
+    assertEquals(0, page.getPageCount());
+    assertEquals(0, page.getSize());
+    assertEquals(0, page.getOffset());
+    assertTrue(page.isEmpty());
+    assertTrue(page.isFirst());
+    assertTrue(page.isLast());
   }
 
   @Test
-  public void firstPage() {
+  void firstPage() {
     List<String> items = new ArrayList<>();
     items.add("1");
     Page<String> page = Page.build(1, 25, items, 101);
-    assertThat(page.getNumber(), is(1));
-    assertThat(page.getCapacity(), is(25));
-    assertThat(page.getRows(), notNullValue());
-    assertThat(page.getTotalCount(), is(101L));
+    assertEquals(1, page.getNumber());
+    assertEquals(25, page.getCapacity());
+    assertNotNull(page.getRows());
+    assertEquals(101L, page.getTotalCount());
 
-    assertThat(page.getPageCount(), is(5));
-    assertThat(page.getSize(), is(1));
-    assertThat(page.getOffset(), is(0));
-    assertThat(page.isEmpty(), is(false));
-    assertThat(page.isFirst(), is(true));
-    assertThat(page.isLast(), is(false));
+    assertEquals(5, page.getPageCount());
+    assertEquals(1, page.getSize());
+    assertEquals(0, page.getOffset());
+    assertFalse(page.isEmpty());
+    assertTrue(page.isFirst());
+    assertFalse(page.isLast());
   }
 
   @Test
-  public void secondPage() {
+  void secondPage() {
     List<String> items = new ArrayList<>();
     items.add("1");
     Page<String> page = Page.build(2, 25, items, 101);
-    assertThat(page.getNumber(), is(2));
-    assertThat(page.getCapacity(), is(25));
-    assertThat(page.getRows(), notNullValue());
-    assertThat(page.getTotalCount(), is(101L));
+    assertEquals(2, page.getNumber());
+    assertEquals(25, page.getCapacity());
+    assertNotNull(page.getRows());
+    assertEquals(101L, page.getTotalCount());
 
-    assertThat(page.getPageCount(), is(5));
-    assertThat(page.getSize(), is(1));
-    assertThat(page.getOffset(), is(25));
-    assertThat(page.isEmpty(), is(false));
-    assertThat(page.isFirst(), is(false));
-    assertThat(page.isLast(), is(false));
+    assertEquals(5, page.getPageCount());
+    assertEquals(1, page.getSize());
+    assertEquals(25, page.getOffset());
+    assertFalse(page.isEmpty());
+    assertFalse(page.isFirst());
+    assertFalse(page.isLast());
 
     // another
     page = Page.build(3, 25, items, 101);
-    assertThat(page.getNumber(), is(3));
-    assertThat(page.getCapacity(), is(25));
-    assertThat(page.getRows(), notNullValue());
-    assertThat(page.getTotalCount(), is(101L));
+    assertEquals(3, page.getNumber());
+    assertEquals(25, page.getCapacity());
+    assertNotNull(page.getRows());
+    assertEquals(101L, page.getTotalCount());
 
-    assertThat(page.getPageCount(), is(5));
-    assertThat(page.getSize(), is(1));
-    assertThat(page.getOffset(), is(50));
-    assertThat(page.isEmpty(), is(false));
-    assertThat(page.isFirst(), is(false));
-    assertThat(page.isLast(), is(false));
+    assertEquals(5, page.getPageCount());
+    assertEquals(1, page.getSize());
+    assertEquals(50, page.getOffset());
+    assertFalse(page.isEmpty());
+    assertFalse(page.isFirst());
+    assertFalse(page.isLast());
   }
 
   @Test
-  public void lastPage() {
+  void lastPage() {
     List<String> items = new ArrayList<>();
     items.add("1");
     Page<String> page = Page.build(5, 25, items, 101);
-    assertThat(page.getNumber(), is(5));
-    assertThat(page.getCapacity(), is(25));
-    assertThat(page.getRows(), notNullValue());
-    assertThat(page.getTotalCount(), is(101L));
+    assertEquals(5, page.getNumber());
+    assertEquals(25, page.getCapacity());
+    assertNotNull(page.getRows());
+    assertEquals(101L, page.getTotalCount());
 
-    assertThat(page.getPageCount(), is(5));
-    assertThat(page.getSize(), is(1));
-    assertThat(page.getOffset(), is(100));
-    assertThat(page.isEmpty(), is(false));
-    assertThat(page.isFirst(), is(false));
-    assertThat(page.isLast(), is(true));
-  }
-
-  @Test(expected = UnsupportedOperationException.class)
-  public void canNotModifyPageData() {
-    List<String> items = new ArrayList<>();
-    items.add("1");
-    Page<String> page = Page.build(1, 25, items, 101);
-    page.getRows().add("something");
+    assertEquals(5, page.getPageCount());
+    assertEquals(1, page.getSize());
+    assertEquals(100, page.getOffset());
+    assertFalse(page.isEmpty());
+    assertFalse(page.isFirst());
+    assertTrue(page.isLast());
   }
 
   @Test
-  public void toValidCapacity() {
-    assertThat(Page.toValidCapacity(-1), is(Page.DEFAULT_CAPACITY));
-    assertThat(Page.toValidCapacity(0), is(Page.DEFAULT_CAPACITY));
-    assertThat(Page.toValidCapacity(1), is(1));
-    assertThat(Page.toValidCapacity(10), is(10));
-    assertThat(Page.toValidCapacity(100), is(100));
+  void canNotModifyPageData() {
+    assertThrows(UnsupportedOperationException.class, () -> {
+      List<String> items = new ArrayList<>();
+      items.add("1");
+      Page<String> page = Page.build(1, 25, items, 101);
+      page.getRows().add("something");
+    });
   }
 
   @Test
-  public void calculateOffset() {
-    assertThat(Page.calculateOffset(1, 1), is(0));
-    assertThat(Page.calculateOffset(2, 1), is(1));
-
-    assertThat(Page.calculateOffset(1, 25), is(0));
-    assertThat(Page.calculateOffset(2, 25), is(25));
-
-    assertThat(Page.calculateOffset(1, 100), is(0));
-    assertThat(Page.calculateOffset(2, 100), is(100));
-
-    assertThat(Page.calculateOffset(-1, -1), is(0));
-    assertThat(Page.calculateOffset(-1, 0), is(0));
-    assertThat(Page.calculateOffset(0, 0), is(0));
-    assertThat(Page.calculateOffset(1, 0), is(0));
-    assertThat(Page.calculateOffset(2, 0), is(25));
+  void toValidCapacity() {
+    assertEquals(Page.DEFAULT_CAPACITY, Page.toValidCapacity(-1));
+    assertEquals(Page.DEFAULT_CAPACITY, Page.toValidCapacity(0));
+    assertEquals(1, Page.toValidCapacity(1));
+    assertEquals(10, Page.toValidCapacity(10));
+    assertEquals(100, Page.toValidCapacity(100));
   }
 
   @Test
-  public void iterator() {
+  void calculateOffset() {
+    assertEquals(0, Page.calculateOffset(1, 1));
+    assertEquals(1, Page.calculateOffset(2, 1));
+
+    assertEquals(0, Page.calculateOffset(1, 25));
+    assertEquals(25, Page.calculateOffset(2, 25));
+
+    assertEquals(0, Page.calculateOffset(1, 100));
+    assertEquals(100, Page.calculateOffset(2, 100));
+
+    assertEquals(0, Page.calculateOffset(-1, -1));
+    assertEquals(0, Page.calculateOffset(-1, 0));
+    assertEquals(0, Page.calculateOffset(0, 0));
+    assertEquals(0, Page.calculateOffset(1, 0));
+    assertEquals(25, Page.calculateOffset(2, 0));
+  }
+
+  @Test
+  void iterator() {
     List<String> items = new ArrayList<>();
     for (int i = 0; i < 10; i++) items.add(String.valueOf(i));
     Page<String> page = Page.build(1, 25, items, 101);
     int i = 0;
     for (String row : page) {
-      assertThat(row, is(String.valueOf(i)));
+      assertEquals(String.valueOf(i), row);
       i++;
     }
-    //System.out.println(page.getClass());
-    //System.out.println(new Genson().serialize(page));
   }
 }

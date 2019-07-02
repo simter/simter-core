@@ -1,42 +1,41 @@
 package tech.simter.data;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author RJ
  */
-public class CreatedTest {
+class CreatedTest {
   @Test
-  public void integerId() {
+  void integerId() {
     Created<Integer> c = Created.with(1);
-    assertThat(c.getId(), is(1));
-    assertThat(c.getTs(), is(OffsetDateTime.now().format(Ts.formatter)));
+    assertEquals(1, c.getId());
+    assertEquals(OffsetDateTime.now().format(Ts.formatter), c.getTs());
   }
 
   @Test
-  public void longId() {
+  void longId() {
     Created<Long> c = Created.with(1L);
-    assertThat(c.getId(), is(1L));
-    assertThat(c.getTs(), is(OffsetDateTime.now().format(Ts.formatter)));
+    assertEquals(1L, c.getId());
+    assertEquals(OffsetDateTime.now().format(Ts.formatter), c.getTs());
   }
 
   @Test
-  public void stringId() {
+  void stringId() {
     Created<String> c = Created.with("1");
-    assertThat(c.getId(), is("1"));
-    assertThat(c.getTs(), is(OffsetDateTime.now().format(Ts.formatter)));
+    assertEquals("1", c.getId());
+    assertEquals(OffsetDateTime.now().format(Ts.formatter), c.getTs());
   }
 
   @Test
-  public void nullId() {
-    assertThat(Created.with((Integer) null).getId(), nullValue());
-    assertThat(Created.with((Long) null).getId(), nullValue());
-    assertThat(Created.with((String) null).getId(), nullValue());
+  void nullId() {
+    assertNull(Created.with((Integer) null).getId());
+    assertNull(Created.with((Long) null).getId());
+    assertNull(Created.with((String) null).getId());
   }
 }

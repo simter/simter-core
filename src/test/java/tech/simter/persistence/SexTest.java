@@ -1,33 +1,33 @@
 package tech.simter.persistence;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * @author RJ 2017-04-26
+ * @author RJ
  */
-public class SexTest {
+class SexTest {
   @Test
-  public void valueOf() throws Exception {
-    assertThat(Sex.valueOf(1), is(Sex.Undefined));
-    assertThat(Sex.valueOf(2), is(Sex.Male));
-    assertThat(Sex.valueOf(4), is(Sex.Female));
+  void valueOf() {
+    assertEquals(Sex.Undefined, Sex.valueOf(1));
+    assertEquals(Sex.Male, Sex.valueOf(2));
+    assertEquals(Sex.Female, Sex.valueOf(4));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_0() throws Exception {
-    Sex.valueOf(0);
+  @Test
+  void valueOfFailed_0() {
+    assertThrows(IllegalArgumentException.class, () -> Sex.valueOf(0));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_3() throws Exception {
-    Sex.valueOf(3);
+  @Test
+  void valueOfFailed_3() {
+    assertThrows(IllegalArgumentException.class, () -> Sex.valueOf(3));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void valueOfFailed_5() throws Exception {
-    Sex.valueOf(5);
+  @Test
+  void valueOfFailed_5() {
+    assertThrows(IllegalArgumentException.class, () -> Sex.valueOf(5));
   }
 }

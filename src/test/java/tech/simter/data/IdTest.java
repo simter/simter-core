@@ -1,35 +1,34 @@
 package tech.simter.data;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author RJ
  */
-public class IdTest {
+class IdTest {
   @Test
-  public void integerId() {
+  void integerId() {
     Id c = Id.with(1);
-    assertThat(c.getId(), is(1));
+    assertEquals(1, c.getId());
   }
 
   @Test
-  public void longId() {
+  void longId() {
     Id c = Id.with(1L);
-    assertThat(c.getId(), is(1L));
+    assertEquals(1L, c.getId());
   }
 
   @Test
-  public void stringId() {
+  void stringId() {
     Id c = Id.with("1");
-    assertThat(c.getId(), is("1"));
+    assertEquals("1", c.getId());
   }
 
   @Test
-  public void nullId() {
-    assertThat(Id.with(null).getId(), nullValue());
+  void nullId() {
+    assertNull(Id.with(null).getId());
   }
 }

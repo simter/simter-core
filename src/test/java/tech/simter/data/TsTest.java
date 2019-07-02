@@ -1,18 +1,17 @@
 package tech.simter.data;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author RJ
  */
-public class TsTest {
+class TsTest {
   @Test
-  public void now() {
-    assertThat(Ts.now().getTs(), is(OffsetDateTime.now().format(Ts.formatter)));
+  void now() {
+    assertEquals(OffsetDateTime.now().format(Ts.formatter), Ts.now().getTs());
   }
 }
