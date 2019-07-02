@@ -1,9 +1,17 @@
-# [simter-core](https://github.com/simter/simter-core) changelog
+# simter-core changelog
+
+## 1.1.0 - 2019-07-02
+
+No code changed, just polishing maven config and unit test.
+
+- Use JUnit5 instead of JUnit4
+- Change parent to simter-dependencies-1.2.0
+- Delete unnecessary dependency
 
 ## 1.0.0 - 2019-01-08
 
 - Add `tech.simter.annotation.Comment` annotation
-- Delete `Condition` (some funtion move to simter-query)
+- Delete `Condition` (some function move to simter-query)
 
 ## 0.5.0 - 2018-01-05
 
