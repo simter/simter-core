@@ -8,7 +8,7 @@
     <relativePath/>
   </parent>
   <artifactId>simter-core</artifactId>
-  <version>2.0.0</version>
+  <version>3.0.0</version>
   <packaging>jar</packaging>
   <name>simter-core</name>
   <description>Simter Core</description>
